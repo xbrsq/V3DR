@@ -86,8 +86,6 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth*0.9, window.innerHeight*0.9);
     document.body.appendChild(renderer.domElement);
-    let ctx=renderer.domElement.getContext("2d");
-    aftereffects.ctx = ctx;
 
     // Create cylinders and add them to the scene
     const cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 32);
