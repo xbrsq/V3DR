@@ -77,31 +77,6 @@ controls = {
 
 }
 
-aftereffects = {
-    ctx: null,
-
-    draw: function() {
-        if(this.ctx==null) {
-            console.log("No canvas set");
-            return;
-        }
-        
-        let width  = this.ctx.width;
-        let height = this.ctx.height;
-
-        this.ctx.strokeStyle = 'black';
-        var fillRect = false;
-        this.ctx.rect(0, 0, 150, 100);
-        if (fillRect) {
-        this.ctx.fill();
-        }
-        this.ctx.stroke();
-        
-        return;
-
-    }
-}
-
 function init() {
     scene = new THREE.Scene();
 
@@ -135,7 +110,6 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update()
     renderer.render(scene, camera);
-    aftereffects.draw()
 }
 
 function onWindowResize() {
