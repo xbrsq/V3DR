@@ -28,77 +28,120 @@ if(IMPORT_SCRIPTS=true) {
     document.head.appendChild(script);
 }
 
-
-
-
-
-
 let scene, camera, renderer, controls;
 
 controls = {
 
-    pitch: 0,
+    zoom: 4,
+
+    pitch: (30/180) * Math.PI,
     pitchSpeed: 0.01,
 
-    yaw: 0,
+    yaw: (90/180)*Math.PI,
     yawSpeed: 0.01,
     
     update: function(){
         if(window.keys.ArrowUp){
-            pitch += pitchSpeed;
+            this.pitch += this.pitchSpeed;
         }
         if(window.keys.ArrowDown){
-            pitch -= pitchSpeed;
+            this.pitch -= this.pitchSpeed;
         }
         if(window.keys.ArrowRight){
-            pitch += pitchSpeed;
+            this.yaw += this.yawSpeed;
         }
         if(window.keys.ArrowLeft){
-            pitch -= pitchSpeed;
+            this.yaw -= this.yawSpeed;
         }
 
         this.updateCamera()
     },
 
-    updateCamera: function(){}
+    updateCamera: function(){
+        let x,y,z, ux,uy,uz; // u is for up
+        ux = Math.cos(this.yaw) * Math.cos(this.pitch+90);
+        uz = Math.sin(this.yaw) * Math.cos(this.pitch+90);
+        uy = Math.sin(this.pitch+90);
 
+        x = this.zoom * Math.cos(this.yaw) * Math.cos(this.pitch);
+        z = this.zoom * Math.sin(this.yaw) * Math.cos(this.pitch);
+        y = this.zoom * Math.sin(this.pitch);
+
+        camera.position.x = x;
+        camera.position.y = y;
+        camera.position.z = z;
+
+        camera.lookAt(0,0,0);
+        camera.up = new THREE.Vector3(ux,uy,uz)
+    }
+
+}
+
+aftereffects = {
+    ctx: null,
+
+    draw: function() {
+        if(this.ctx==null) {
+            console.log("No canvas set");
+            return;
+        }
+        
+        let width  = this.ctx.width;
+        let height = this.ctx.height;
+
+        this.ctx.strokeStyle = 'black';
+        var fillRect = false;
+        this.ctx.rect(0, 0, 150, 100);
+        if (fillRect) {
+        this.ctx.fill();
+        }
+        this.ctx.stroke();
+        
+        return;
+
+    }
 }
 
 function init() {
-  scene = new THREE.Scene();
+    scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 5;
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth*0.9, window.innerHeight*0.9);
+    document.body.appendChild(renderer.domElement);
+    let ctx=renderer.domElement.getContext("2d");
+    aftereffects.ctx = ctx;
 
-  // Create cylinders and add them to the scene
-  const cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 32);
-  const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    // Create cylinders and add them to the scene
+    const cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 32);
+    const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
-  const cylinder1 = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
-  const cylinder2 = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
+    const cylinder1 = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
+    const cylinder2 = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
 
-  cylinder1.position.x = -2;
-  cylinder2.position.x = 2;
+    cylinder1.position.x = -2;
+    cylinder2.position.x = 2;
+    cylinder2.position.y = 0.5;
 
-  scene.add(cylinder1);
-  scene.add(cylinder2);
+    scene.add(cylinder1);
+    scene.add(cylinder2);
 
-  animate();
+    animate();
 }
 
 function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+    controls.update()
+    renderer.render(scene, camera);
+    aftereffects.draw()
 }
 
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth*0.9, window.innerHeight*0.9);
 }
 
 window.addEventListener('resize', onWindowResize);

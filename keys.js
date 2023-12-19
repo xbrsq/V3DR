@@ -7,7 +7,7 @@ window.addEventListener('keydown', (event) => {
   window.keys[event.key] = true;
 
   // You can perform actions based on the pressed key
-  console.log('Key pressed:', keyPressed);
+  // console.log('Key pressed:', keyPressed);
 });
 
 window.addEventListener('keyup', (event) => {
@@ -17,6 +17,6 @@ window.addEventListener('keyup', (event) => {
     window.keys[event.key] = false;
     
     // You can perform actions based on the pressed key
-    console.log('Key up:', keyPressed);
+    // console.log('Key up:', keyPressed);
   });
     
