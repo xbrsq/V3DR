@@ -31,6 +31,7 @@ class GenerationError extends Error {
       super(message);
       this.name = "GenerationError"; 
     }
+    static formatString = "Error generating %%name%%: %%other%%"
   }
 
 let scene, camera, renderer, controls;
@@ -91,14 +92,21 @@ function gen_object(type, argument_array) {
 
     for(let i=1;i<generators.length;i++) { // start at 1 because Example Object is #0.
         if(type==generators[i].genID) {
-            obj = generators[i].generate(...argument_array)
-            i=100000000; // break out of for loop, because I have had poor experiences with break and if interactions.
+            try {
+                obj = generators[i].generate(...argument_array)
+                i=100000000; // break out of for loop, because I have had poor experiences with break and if interactions.
+            }
+            catch(err) {
+                throw new GenerationError(
+                    GenerationError.formatString
+                    .replace("%%name%%", generators[i].name)
+                    .replace("%%other%%", err.message));
+            }
         }
     }
     scene.add(obj);
 
-
-
+    return obj;
 }
 
 function init() {
@@ -126,6 +134,19 @@ function init() {
     scene.add(cylinder2);
 
     animate();
+
+    gen_object("cyl", [
+        [1, 2, 1], 
+        [0, 45, 45], 
+        0.2, 
+        3, 
+        0x00ff00
+    ]);
+    console.log(gen_object("lin", [
+        [2, 2, 1], 
+        [-4, 3, -1.5],
+        0x00ff00
+    ]));
 }
 
 function animate() {
