@@ -1,3 +1,4 @@
+const DEG_to_RAD = Math.PI/180;
 generators = [
     {
         name: "Example Object",     // name is the internal name, used for errors, etc.
@@ -8,7 +9,7 @@ generators = [
         generate: function() {},    // generate is the function to generate the object. It should NOT add to the scene,
                                     //      that will be handled elsewhere. You should, however, set the position & rotation.
     },
-    {
+    { // cylinder
         name: "Cylinder",
         genID: "cyl",
         generate: function(pos, rot, radius, height, color, opacity=1) {
@@ -22,13 +23,13 @@ generators = [
 
             let obj = new THREE.Mesh(geometry, material);
             
-            obj.position.set(...pos);            
-            obj.rotation.set(...rot);
+            obj.position.set(...pos);
+            obj.rotation.set(rot[0]*DEG_to_RAD, rot[1]*DEG_to_RAD, rot[2]*DEG_to_RAD);
 
             return obj;
         }
     },
-    {
+    { // line
         name: "Line",
         genID: "lin",
         generate: function(start, end, color, opacity) {

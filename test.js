@@ -95,9 +95,9 @@ function gen_object(type, argument_array) {
         return;
     }
 
-    let obj;
+    let obj,i;
 
-    for(let i=1;i<generators.length;i++) { // start at 1 because Example Object is #0.
+    for(i=1;i<generators.length;i++) { // start at 1 because Example Object is #0.
         if(type==generators[i].genID) {
             try {
                 obj = generators[i].generate(...argument_array)
@@ -110,6 +110,12 @@ function gen_object(type, argument_array) {
                     .replace("%%other%%", err.message));
             }
         }
+    }
+    if(i!=100000001){
+        throw new GenerationError(
+            GenerationError.formatString
+            .replace("%%name%%", "object")
+            .replace("%%other%%", "unknown type: "+type));
     }
     scene.add(obj);
 
@@ -133,18 +139,20 @@ function single_gen_from_string(input_string) {
         }
     }
 
-    console.log(data);
-
     return gen_object(type, data);
 }
 
 function multi_from_string(input_string) {
     let lines = input_string.split("\n");
     let line;
-    for(let n=0;n<lines.length;line=lines[n++]) {
+    for(let n=0;n<lines.length;n++) {
+        line=lines[n];
+        if(line==""){
+            continue;
+        }
         switch(lines[n][0]) {
             case "+":                    // add object
-                single_gen_from_string(line)
+                console.log(single_gen_from_string(line.slice(1)));
                 break;
             case ":":                   // command
                 break;
@@ -167,40 +175,44 @@ function init() {
     animate();
 
 
-    gen_object("cyl", [ // debug cyl1
-        [-2, 0, 3],
-        [0, 0, 0],
-        1,
-        1,
-        0xff0000,
-        0.9
-    ]);
+    // gen_object("cyl", [ // debug cyl1
+    //     [-2, 0, 3],
+    //     [0, 0, 0],
+    //     1,
+    //     1,
+    //     0xff0000,
+    //     0.9
+    // ]);
 
-    gen_object("cyl", [ // debug cyl2
-        [2, 0.5, 0],
-        [0, 0, 0],
-        1,
-        1,
-        0xff0000,
-        0.9
-    ]);
+    // gen_object("cyl", [ // debug cyl2
+    //     [2, 0.5, 0],
+    //     [0, 0, 0],
+    //     1,
+    //     1,
+    //     0xff0000,
+    //     0.9
+    // ]);
 
-    gen_object("cyl", [
-        [1, 2, 1], 
-        [0, 45, 45], 
-        0.2, 
-        3, 
-        0x00ff00,
-        0.5
-    ]);
-    gen_object("lin", [
-        [2, 2, 1], 
-        [-4, 3, -1.5],
-        0x00ff00,
-        0.8
-    ]);
+    // gen_object("cyl", [
+    //     [1, 2, 1], 
+    //     [0, 45, 45], 
+    //     0.2, 
+    //     3, 
+    //     0x00ff00,
+    //     0.5
+    // ]);
+    // gen_object("lin", [
+    //     [2, 2, 1], 
+    //     [-4, 3, -1.5],
+    //     0x00ff00,
+    //     0.8
+    // ]);
 
-    single_gen_from_string("cyl;0,3,0;0,0,0;2;0.2;65535;0.1");
+    multi_from_string(
+        "+cyl;0,3,0;0,0,0;2;0.2;16711935;0.9\n" +
+        "+cyl;0,-3,0;0,0,0;2;0.2;16711935;0.9\n" +
+        "+cyl;3,0,0;0,0,90;2;0.2;16711935;0.9\n"
+    )
 }
 
 function animate() {
