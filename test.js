@@ -31,8 +31,8 @@ class GenerationError extends Error {
       super(message);
       this.name = "GenerationError"; 
     }
-    static formatString = "Error generating %%name%%: %%other%%"
-  }
+    static formatString = "Error generating %%name%%: Encountered %%other%%"
+}
 
 let scene, camera, renderer, controls;
 
@@ -109,6 +109,16 @@ function gen_object(type, argument_array) {
     return obj;
 }
 
+function single_gen_from_string(input_string) {
+    let input = input_string.split(";");
+    let type = data[0];      // which generator to use
+    let data= data.slice(1); // data fed to generator
+
+    for(let i=0;i<data.length;i++) {
+        data[i] = parseFloat(data[i]); // all data should be in numerical format
+    }
+}
+
 function init() {
     scene = new THREE.Scene();
 
@@ -119,34 +129,41 @@ function init() {
     renderer.setSize(window.innerWidth*0.9, window.innerHeight*0.9);
     document.body.appendChild(renderer.domElement);
 
-    // Create cylinders and add them to the scene
-    const cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2, 32);
-    const cylinderMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-
-    const cylinder1 = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
-    const cylinder2 = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
-
-    cylinder1.position.x = -2;
-    cylinder2.position.x = 2;
-    cylinder2.position.y = 0.5;
-
-    scene.add(cylinder1);
-    scene.add(cylinder2);
-
     animate();
+
+
+    gen_object("cyl", [ // cyl1
+        [-2, 0, 3],
+        [0, 0, 0],
+        1,
+        1,
+        0xff0000,
+        0.9
+    ]);
+
+    gen_object("cyl", [ // cyl2
+        [2, 0.5, 0],
+        [0, 0, 0],
+        1,
+        1,
+        0xff0000,
+        0.9
+    ]);
 
     gen_object("cyl", [
         [1, 2, 1], 
         [0, 45, 45], 
         0.2, 
         3, 
-        0x00ff00
+        0x00ff00,
+        0.5
     ]);
-    console.log(gen_object("lin", [
+    gen_object("lin", [
         [2, 2, 1], 
         [-4, 3, -1.5],
-        0x00ff00
-    ]));
+        0x00ff00,
+        0.8
+    ]);
 }
 
 function animate() {
