@@ -1,11 +1,11 @@
 if(IMPORT_SCRIPTS=true) {
     var keyscript = document.createElement('script');
-
-    // Set the source to the Three.js CDN or local path
     keyscript.src = 'keys.js';
-
-    // Append the script element to the head of the document
     document.head.appendChild(keyscript);
+
+    var genscript = document.createElement('script');
+    genscript.src = 'generators.js';
+    document.head.appendChild(genscript);
 
     var script = document.createElement('script');
 
@@ -17,16 +17,21 @@ if(IMPORT_SCRIPTS=true) {
     // Code to execute after Three.js is loaded
     init();
     console.log('Three.js has been loaded!');
-    // You can start using Three.js here
-    // For example:
-    // var scene = new THREE.Scene();
-    // var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // ...
     };
 
     // Append the script element to the head of the document
     document.head.appendChild(script);
 }
+
+
+
+
+class GenerationError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "GenerationError"; 
+    }
+  }
 
 let scene, camera, renderer, controls;
 
@@ -74,6 +79,25 @@ controls = {
         camera.lookAt(0,0,0);
         camera.up = new THREE.Vector3(ux,uy,uz)
     }
+
+}
+
+function gen_object(type, argument_array) {
+    if(argument_array.length==0) {
+        return;
+    }
+
+    let obj;
+
+    for(let i=1;i<generators.length;i++) { // start at 1 because Example Object is #0.
+        if(type==generators[i].genID) {
+            obj = generators[i].generate(...argument_array)
+            i=100000000; // break out of for loop, because I have had poor experiences with break and if interactions.
+        }
+    }
+    scene.add(obj);
+
+
 
 }
 
