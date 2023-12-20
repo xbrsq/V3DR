@@ -39,6 +39,7 @@ let scene, camera, renderer, controls;
 controls = {
 
     zoom: 4,
+    zoomSpeed: 0.01,
 
     pitch: (30/180) * Math.PI,
     pitchSpeed: 0.01,
@@ -58,6 +59,12 @@ controls = {
         }
         if(window.keys.ArrowLeft){
             this.yaw -= this.yawSpeed;
+        }
+        if(window.keys.PageUp){
+            this.zoom /= this.zoomSpeed + 1;
+        }
+        if(window.keys.PageDown){
+            this.zoom *= this.zoomSpeed + 1;
         }
 
         this.updateCamera()
@@ -111,11 +118,39 @@ function gen_object(type, argument_array) {
 
 function single_gen_from_string(input_string) {
     let input = input_string.split(";");
-    let type = data[0];      // which generator to use
-    let data= data.slice(1); // data fed to generator
+    let type = input[0];      // which generator to use
+    let data= input.slice(1); // data fed to generator for arguments
 
     for(let i=0;i<data.length;i++) {
-        data[i] = parseFloat(data[i]); // all data should be in numerical format
+        if(data[i].search(",")){    // if the data includes a comma, split it into multiple subentries (for pos, rot, etc.)
+            data[i] = data[i].split(",");
+            for(let j=0;j<data[i].length;j++) {
+                data[i][j] = parseFloat(data[i][j]); // all data should be in numerical format
+            }
+        }
+        else {
+            data[i] = parseFloat(data[i]); // all data should be in numerical format
+        }
+    }
+
+    console.log(data);
+
+    return gen_object(type, data);
+}
+
+function multi_from_string(input_string) {
+    let lines = input_string.split("\n");
+    let line;
+    for(let n=0;n<lines.length;line=lines[n++]) {
+        switch(lines[n][0]) {
+            case "+":                    // add object
+                single_gen_from_string(line)
+                break;
+            case ":":                   // command
+                break;
+            default:    //unknown identifier
+                console.log("Unknown identifier: "+lines[n][0]+" on line "+n);
+        }
     }
 }
 
@@ -132,7 +167,7 @@ function init() {
     animate();
 
 
-    gen_object("cyl", [ // cyl1
+    gen_object("cyl", [ // debug cyl1
         [-2, 0, 3],
         [0, 0, 0],
         1,
@@ -141,7 +176,7 @@ function init() {
         0.9
     ]);
 
-    gen_object("cyl", [ // cyl2
+    gen_object("cyl", [ // debug cyl2
         [2, 0.5, 0],
         [0, 0, 0],
         1,
@@ -164,6 +199,8 @@ function init() {
         0x00ff00,
         0.8
     ]);
+
+    single_gen_from_string("cyl;0,3,0;0,0,0;2;0.2;65535;0.1");
 }
 
 function animate() {

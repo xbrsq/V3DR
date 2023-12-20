@@ -24,7 +24,7 @@ generators = [
             
             obj.position.set(...pos);            
             obj.rotation.set(...rot);
-            console.log(obj);
+
             return obj;
         }
     },
