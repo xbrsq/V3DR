@@ -1,5 +1,5 @@
 const DEG_to_RAD = Math.PI/180;
-generators = [
+const generators = [
     {
         name: "Example Object",     // name is the internal name, used for errors, etc.
         genID: "exm",               // genID is the string in the input used to generate the object.

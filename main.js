@@ -1,13 +1,17 @@
 if(IMPORT_SCRIPTS=true) {
-    var keyscript = document.createElement('script');
+    let keyscript = document.createElement('script');
     keyscript.src = 'keys.js';
     document.head.appendChild(keyscript);
 
-    var genscript = document.createElement('script');
+    let genscript = document.createElement('script');
     genscript.src = 'generators.js';
     document.head.appendChild(genscript);
 
-    var script = document.createElement('script');
+    let comscript = document.createElement('script');
+    comscript.src = 'commands.js';
+    document.head.appendChild(comscript);
+
+    let script = document.createElement('script');
 
     // Set the source to the Three.js CDN or local path
     script.src = 'https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js';
@@ -41,10 +45,10 @@ controls = {
     zoom: 4,
     zoomSpeed: 0.01,
 
-    pitch: (30/180) * Math.PI,
+    pitch: 0,
     pitchSpeed: 0.01,
 
-    yaw: (90/180)*Math.PI,
+    yaw: 0,
     yawSpeed: 0.01,
     
     update: function(){
@@ -152,12 +156,25 @@ function multi_from_string(input_string) {
         }
         switch(lines[n][0]) {
             case "+":                    // add object
-                console.log(single_gen_from_string(line.slice(1)));
+                single_gen_from_string(line.slice(1));
                 break;
             case ":":                   // command
+                single_command_from_string(line.slice(1))
                 break;
             default:    //unknown identifier
                 console.log("Unknown identifier: "+lines[n][0]+" on line "+n);
+        }
+    }
+}
+
+function single_command_from_string(input_string) {
+    let dist_to_space = input_string.search(" ");
+    let comName = input_string.slice(0,dist_to_space);
+    let data = input_string.slice(dist_to_space+1);
+    
+    for(let i=0;i<commands.length;i++){
+        if(comName == commands[i].comID) {
+            commands[i].execute(data);
         }
     }
 }
@@ -211,7 +228,8 @@ function init() {
     multi_from_string(
         "+cyl;0,3,0;0,0,0;2;0.2;16711935;0.9\n" +
         "+cyl;0,-3,0;0,0,0;2;0.2;16711935;0.9\n" +
-        "+cyl;3,0,0;0,0,90;2;0.2;16711935;0.9\n"
+        "+cyl;3,0,0;0,0,90;2;0.2;16711935;0.9\n" +
+        ":BGSET red\n:PITCH 30\n:YAW 90\n:ZOOM 10"
     )
 }
 
