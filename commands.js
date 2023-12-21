@@ -1,4 +1,8 @@
-const commands = [
+function add_command(command) {
+
+}
+
+var commands = [
 	{
 		name: "Example Command",	// name is the name of the command, used in error messages.
 		comID: "EXAMPLE",			// comID is the string used to invoke the command.
@@ -14,25 +18,24 @@ const commands = [
 		}
 	},
 	{ // set pitch
-		name: "Background Set",
+		name: "Pitch Set",
 		comID: "PITCH",
 		execute: function(data) {
-			controls.pitch = parseFloat(data);
+			controls.pitch = parseFloat(data) * DEG_to_RAD;
 		}
 	},
 	{ // set yaw
-		name: "Background Set",
+		name: "Yaw Set",
 		comID: "YAW",
 		execute: function(data) {
-			controls.yaw = parseFloat(data);
+			controls.yaw = parseFloat(data) * DEG_to_RAD;
 		}
 	},
 	{ // set zoom
-		name: "Background Set",
+		name: "Zoom Set",
 		comID: "ZOOM",
 		execute: function(data) {
 			controls.zoom = parseFloat(data);
 		}
-	},
-	
+	}
 ]

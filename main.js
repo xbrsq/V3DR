@@ -20,7 +20,7 @@ if(IMPORT_SCRIPTS=true) {
     script.onload = function () {
     // Code to execute after Three.js is loaded
     init();
-    console.log('Three.js has been loaded!');
+    // console.log('Three.js has been loaded!');
     };
 
     // Append the script element to the head of the document
@@ -70,19 +70,21 @@ controls = {
         if(window.keys.PageDown){
             this.zoom *= this.zoomSpeed + 1;
         }
-
+        
         this.updateCamera()
     },
 
     updateCamera: function(){
         let x,y,z, ux,uy,uz; // u is for up
-        ux = Math.cos(this.yaw) * Math.cos(this.pitch+90);
-        uz = Math.sin(this.yaw) * Math.cos(this.pitch+90);
-        uy = Math.sin(this.pitch+90);
-
         x = this.zoom * Math.cos(this.yaw) * Math.cos(this.pitch);
         z = this.zoom * Math.sin(this.yaw) * Math.cos(this.pitch);
         y = this.zoom * Math.sin(this.pitch);
+
+        ux = Math.cos(this.yaw) * Math.cos(this.pitch+1);
+        uz = Math.sin(this.yaw) * Math.cos(this.pitch+1);
+        uy = Math.sin(this.pitch+2);        // I have no idea why 1 works as a value ¯\_(ツ)_/¯
+                                            // if you do what it should be (90*DEG_to_RAD), then
+                                            // it has a slight bit of roll while pressing a yaw key
 
         camera.position.x = x;
         camera.position.y = y;
@@ -186,7 +188,7 @@ function init() {
     camera.position.z = 5;
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth*0.9, window.innerHeight*0.9);
+    renderer.setSize(window.innerWidth*0.98, window.innerHeight*0.98);
     document.body.appendChild(renderer.domElement);
 
     animate();
@@ -229,7 +231,7 @@ function init() {
         "+cyl;0,3,0;0,0,0;2;0.2;16711935;0.9\n" +
         "+cyl;0,-3,0;0,0,0;2;0.2;16711935;0.9\n" +
         "+cyl;3,0,0;0,0,90;2;0.2;16711935;0.9\n" +
-        ":BGSET red\n:PITCH 30\n:YAW 90\n:ZOOM 10"
+        ":BGSET red\n:PITCH 0\n:YAW 90\n:ZOOM 10"
     )
 }
 
@@ -242,7 +244,7 @@ function animate() {
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth*0.9, window.innerHeight*0.9);
+    renderer.setSize(window.innerWidth*0.98, window.innerHeight*0.98);
 }
 
 window.addEventListener('resize', onWindowResize);
