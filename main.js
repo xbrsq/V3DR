@@ -38,7 +38,7 @@ class GenerationError extends Error {
     static formatString = "Error generating %%name%%: Encountered %%other%%"
 }
 
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, stack;
 
 controls = {
 
@@ -96,6 +96,8 @@ controls = {
 
 }
 
+stack = [];
+
 function gen_object(type, argument_array) {
     if(argument_array.length==0) {
         return;
@@ -123,7 +125,9 @@ function gen_object(type, argument_array) {
             .replace("%%name%%", "object")
             .replace("%%other%%", "unknown type: "+type));
     }
+
     scene.add(obj);
+    stack.push(obj);
 
     return obj;
 }
