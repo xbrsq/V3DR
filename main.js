@@ -38,7 +38,15 @@ class GenerationError extends Error {
     static formatString = "Error generating %%name%%: Encountered %%other%%"
 }
 
-let scene, camera, renderer, controls, stack;
+class ArgumentError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "ArgumentError"; 
+    }
+    static formatString = "Incorrect number of arguments: %%number%%";
+}
+
+let scene, camera, renderer, controls, objStack;
 
 controls = {
 
@@ -96,7 +104,7 @@ controls = {
 
 }
 
-stack = [];
+objStack = [];
 
 function gen_object(type, argument_array) {
     if(argument_array.length==0) {
@@ -127,7 +135,7 @@ function gen_object(type, argument_array) {
     }
 
     scene.add(obj);
-    stack.push(obj);
+    objStack.push(obj);
 
     return obj;
 }
