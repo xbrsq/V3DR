@@ -59,12 +59,12 @@ controls = {
     yaw: 0,
     yawSpeed: 0.01,
 
-    xPanSpeed: 0.03,
     xPan: 0,
-    yPanSpeed: 0.03,
     yPan: 0,
-    zPanSpeed: 0.03,
     zPan: 0,
+
+    yPanSpeed: 0.03,
+    xzPanSpeed: 0.1,
     
     update: function(){
         this.updateCamera()
@@ -90,20 +90,20 @@ controls = {
         }
 
         if(window.keys.w){
-            this.xPan -= Math.cos(this.yaw)*this.xPanSpeed;
-            this.zPan -= Math.sin(this.yaw)*this.xPanSpeed;
+            this.xPan -= Math.cos(this.yaw)*this.xzPanSpeed;
+            this.zPan -= Math.sin(this.yaw)*this.xzPanSpeed;
         }
         if(window.keys.s){
-            this.xPan += Math.cos(this.yaw)*this.xPanSpeed;
-            this.zPan += Math.sin(this.yaw)*this.xPanSpeed;
+            this.xPan += Math.cos(this.yaw)*this.xzPanSpeed;
+            this.zPan += Math.sin(this.yaw)*this.xzPanSpeed;
         }
         if(window.keys.a){
-            this.xPan += Math.cos(this.yaw+(90*DEG_to_RAD))*this.xPanSpeed;
-            this.zPan += Math.sin(this.yaw+(90*DEG_to_RAD))*this.xPanSpeed;
+            this.xPan += Math.cos(this.yaw+(90*DEG_to_RAD))*this.xzPanSpeed;
+            this.zPan += Math.sin(this.yaw+(90*DEG_to_RAD))*this.xzPanSpeed;
         }
         if(window.keys.d){
-            this.xPan -= Math.cos(this.yaw+(90*DEG_to_RAD))*this.xPanSpeed;
-            this.zPan -= Math.sin(this.yaw+(90*DEG_to_RAD))*this.xPanSpeed;
+            this.xPan -= Math.cos(this.yaw+(90*DEG_to_RAD))*this.xzPanSpeed;
+            this.zPan -= Math.sin(this.yaw+(90*DEG_to_RAD))*this.xzPanSpeed;
         }
         
     },
@@ -225,8 +225,10 @@ function single_command_from_string(input_string) {
     for(let i=0;i<commands.length;i++){
         if(comName == commands[i].comID) {
             commands[i].execute(data);
+            return;
         }
     }
+    throw new Error("Unknown comName: "+comName)
 }
 
 function init() {
@@ -241,16 +243,27 @@ function init() {
     animate();
 
     multi_from_string(
+        ":IMPORT STACK\n"+
         "+cyl;0,0,0;0,0,0;0.2;0.2;black;0.9\n"+
         "+cyl;0,3,0;0,0,0;2;0.2;green;0.9\n" +
         "+cyl;0,-3,0;0,0,0;2;0.2;purple;0.9\n" +
         "+cyl;3,0,0;0,0,90;2;0.2;magenta;0.9\n" +
         ":BGSET red\n:ZOOM 10\n"+
-        ":S_PUSH 1\n"+
-        "~:S_OP /0 + 1 0\n"+
-        "~:YAW /0\n"+
-        ":SUPERKILL"
-        // +"~:DEBUG /0\n"
+        ":STACK.PUSH 1\n"+ // current yaw
+        ":STACK.PUSH 1\n"+ // current dyaw
+        ":STACK.PUSH 0\n"+ // temp output for condition
+        "~:STACK.OP /0 + /1 0\n"+
+        "~:STACK.OP /0 >= 180 2\n"+
+        "~:STACK.IF /2 STACK.OP /1 * -1 1\n"+
+        "~:STACK.OP /0 <= -180 2\n"+
+        "~:STACK.IF /2 STACK.OP /1 * -1 1\n"+
+        "~:YAW /0\n"
+
+        
+        
+        
+        //+
+        // "~:DEBUG /0\n"
         
     )
 }
@@ -280,4 +293,9 @@ function onWindowResize() {
 
 window.addEventListener('resize', onWindowResize);
 
-// init();
+function genDebugObjects() {
+    for(let i=1;i<generators.length;i++){
+        console.log(i);
+        o = gen_object(generators[i].genID, [[i*8, 0, 0], [0,0,0], 3,3,3,3,3,3,3])
+    }
+}

@@ -9,11 +9,38 @@ function parse_argument(raw) {
 	if(~isNaN(parseFloat(raw))){
 		return parseFloat(raw);
 	}
+
 	return raw;
 }
 
+class CommandLibrary {
+	
+	static all = [];
+	constructor(name, commands_in=[]) {
+		this.name = name;
+		this.commands = [];
+		this.addCommandList(commands_in)
+		CommandLibrary.all.push(this);
+	}
+
+	addCommandList(commandList) {
+		for(let i=0;i<commandList.length;i++) {
+			commandList[i].comID = "%%name%%.%%comID%%"
+			.replace("%%comID%%", commandList[i].comID)
+			.replace("%%name%%", this.name);
+		}
+		this.commands.push(...commandList)
+	}
+
+	load() {
+		commands.push(...this.commands)
+	}
+
+
+}
+
 var commands = [
-	{
+	{ // Example
 		name: "Example Command",	// name is the name of the command, used in error messages.
 		comID: "EXAMPLE",			// comID is the string used to invoke the command.
 									// 		CANNOT include spaces. Should be all caps.
@@ -157,16 +184,80 @@ var commands = [
 			objStack[objStack.length-parseInt(data)].position.set(controls.xPan, controls.yPan, controls.zPan)
 		}
 	},
+	{ // DEBUG
+		name: "DEBUG",
+		comID: "DEBUG",
+		execute: function(data) {
+			console.log(parse_argument(data));
+		}
+	},
+	{ // SUPERKILL
+		name: "Stop Everything",
+		comID: "SUPERKILL",
+		execute: function(data) {
+			running = false;
+		}
+	},
+	{ // import lib
+		name: "Import Library",
+		comID: "IMPORT",
+		execute: function(data) {
+			data = data.trim;
+			for(let i=0;i<CommandLibrary.all.length;i++) {
+				if(CommandLibrary.all[i].name = data) {
+					CommandLibrary.all[i].load();
+				}
+			}
+		}
+	},
+	{ // 
+		name: "",
+		comID: "",
+		execute: function(data) {
+			
+		}
+	}
+]
+
+
+
+const Stack = new CommandLibrary("STACK", [
+	{ // conditional execute
+		name: "Conditional Execute",
+		comID: "IF",
+		execute: function(data) {
+			let index = data.search(" ");
+			let condition = parse_argument(data.slice(0, index));
+			let command = data.slice(index+1);
+
+			if(condition>0){
+				single_command_from_string(command);
+			}
+
+		}
+	},
+	{ // set stack value
+		name: "Stack Set",
+		comID: "SET",
+		execute: function(data) {
+			data = data.split(" ");
+
+			let pos = parse_argument(data[0]);
+			let val = parse_argument(data[0]);
+
+			stack[pos] = val;
+		}
+	},
 	{ // push to stack
 		name: "Push to stack",
-		comID: "S_PUSH",
+		comID: "PUSH",
 		execute: function(data) {
 			stack.push(parse_argument(data));
 		}
 	},
-	{ // push to stack
+	{ // stack operation
 		name: "Do Operation on Stack",
-		comID: "S_OP",
+		comID: "OP",
 		execute: function(data) {
 			data = data.split(" ");
 			let a = parse_argument(data[0]);
@@ -174,7 +265,7 @@ var commands = [
 			let b = parse_argument(data[2]);
 			let c = a;
 
-			switch(op) {
+			switch(op) { // all the operators
 				case '+':
 					c+=b;
 					break;
@@ -205,32 +296,36 @@ var commands = [
 				case '^':
 					c=a^b;
 					break;
+				case '<':
+					c=a<b;
+					break;
+				case '>':
+					c=a>b;
+					break;
+				case '==':
+					c=a==b;
+					break;
+				case '!=':
+					c=a!=b;
+					break;
+				case '<=':
+					c=a<=b;
+					break;
+				case '>=':
+					c=a>=b;
+					break;
+				case '=':
+					c=a;
+					break;
 				default:
 					throw new Error("Incorrect operator: "+op);
+			}
+
+			if(typeof(c) == 'boolean'){
+				c = c?1:0; // cast to int
 			}
 			
 			stack[parse_argument(data[3])] = c;
 		}
-	},
-	{ // DEBUG
-		name: "DEBUG",
-		comID: "DEBUG",
-		execute: function(data) {
-			console.log(parse_argument(data));
-		}
-	},
-	{ // SUPERKILL
-		name: "Stop Everything",
-		comID: "SUPERKILL",
-		execute: function(data) {
-			running = false;
-		}
-	},
-	{ // 
-		name: "",
-		comID: "",
-		execute: function(data) {
-			
-		}
 	}
-]
+]);
