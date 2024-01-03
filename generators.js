@@ -15,11 +15,12 @@ const generators = [
         generate: function(pos, rot, radius, height, color, opacity=1) {
             let geometry = new THREE.CylinderGeometry(radius, radius, height, 32);
 
-            let material = new THREE.MeshBasicMaterial({color: color});
+            let material = new THREE.MeshBasicMaterial();
             if(opacity<1){
                 material.opacity = opacity;
                 material.transparent = true;
             }
+            material.color = new THREE.Color(color);
 
             let obj = new THREE.Mesh(geometry, material);
             

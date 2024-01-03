@@ -1,5 +1,15 @@
-function add_command(command) {
+function parse_argument(raw) {
+	if(raw[0]=="/"){
+		return stack[parse_argument(raw.slice(1))];
+	}
+	if(raw[0]=="&"){
+		return objStack[parse_argument(raw.slice(1))];
+	}
 
+	if(~isNaN(parseFloat(raw))){
+		return parseFloat(raw);
+	}
+	return raw;
 }
 
 var commands = [
@@ -21,21 +31,21 @@ var commands = [
 		name: "Pitch Set",
 		comID: "PITCH",
 		execute: function(data) {
-			controls.pitch = parseFloat(data) * DEG_to_RAD;
+			controls.pitch = parse_argument(data) * DEG_to_RAD;
 		}
 	},
 	{ // set camera yaw					YAW
 		name: "Yaw Set",
 		comID: "YAW",
 		execute: function(data) {
-			controls.yaw = parseFloat(data) * DEG_to_RAD;
+			controls.yaw = parse_argument(data) * DEG_to_RAD;
 		}
 	},
 	{ // set camera zoom				ZOOM
 		name: "Zoom Set",
 		comID: "ZOOM",
 		execute: function(data) {
-			controls.zoom = parseFloat(data);
+			controls.zoom = parse_argument(data);
 		}
 	},
 	{ // set rotation					SETROT
@@ -45,7 +55,7 @@ var commands = [
 			let dataAsStrings = data.trim().split(",")
 			let dataAsNumbers = [];
 			for(let i=0;i<dataAsNumbers.length;i++) {
-				dataAsNumbers[i] = parseInt(dataAsStrings[i]);
+				dataAsNumbers[i] = parse_argument(dataAsStrings[i]);
 			}
 
 			let stackIndex;
@@ -79,7 +89,7 @@ var commands = [
 			let dataAsStrings = data.trim().split(",")
 			let dataAsNumbers = [];
 			for(let i=0;i<dataAsNumbers.length;i++) {
-				dataAsNumbers[i] = parseInt(dataAsStrings[i]);
+				dataAsNumbers[i] = parse_argument(dataAsStrings[i]);
 			}
 
 			let stackIndex;
@@ -113,7 +123,7 @@ var commands = [
 			let dataAsStrings = data.trim().split(",")
 			let dataAsNumbers = [];
 			for(let i=0;i<dataAsNumbers.length;i++) {
-				dataAsNumbers[i] = parseInt(dataAsStrings[i]);
+				dataAsNumbers[i] = parse_argument(dataAsStrings[i]);
 			}
 
 			let stackIndex;
@@ -140,14 +150,83 @@ var commands = [
 				);
 		}
 	},
-	{
-		name: "",
-		comID: "",
-		execute: function(data) {
-			
+	{ // Move To pan center
+		name: "Move To pan center",
+		comID: "CENTER",
+		execute: function(data) { // data is the index to objStack
+			objStack[objStack.length-parseInt(data)].position.set(controls.xPan, controls.yPan, controls.zPan)
 		}
 	},
-	{
+	{ // push to stack
+		name: "Push to stack",
+		comID: "S_PUSH",
+		execute: function(data) {
+			stack.push(parse_argument(data));
+		}
+	},
+	{ // push to stack
+		name: "Do Operation on Stack",
+		comID: "S_OP",
+		execute: function(data) {
+			data = data.split(" ");
+			let a = parse_argument(data[0]);
+			let op = data[1];
+			let b = parse_argument(data[2]);
+			let c = a;
+
+			switch(op) {
+				case '+':
+					c+=b;
+					break;
+				case '-':
+					c-=b;
+					break;
+				case '*':
+					c*=b;
+					break;
+				case '/':
+					c/=b;
+					break;
+				case '%':
+					c%=b;
+					break;
+				case '>>':
+					c=a>>b;
+					break;
+				case '<<':
+					c=a<<b;
+					break;
+				case '&':
+					c=a&b;
+					break;
+				case '|':
+					c=a|b;
+					break;
+				case '^':
+					c=a^b;
+					break;
+				default:
+					throw new Error("Incorrect operator: "+op);
+			}
+			
+			stack[parse_argument(data[3])] = c;
+		}
+	},
+	{ // DEBUG
+		name: "DEBUG",
+		comID: "DEBUG",
+		execute: function(data) {
+			console.log(parse_argument(data));
+		}
+	},
+	{ // SUPERKILL
+		name: "Stop Everything",
+		comID: "SUPERKILL",
+		execute: function(data) {
+			running = false;
+		}
+	},
+	{ // 
 		name: "",
 		comID: "",
 		execute: function(data) {
