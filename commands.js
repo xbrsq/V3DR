@@ -6,7 +6,7 @@ function parse_argument(raw) {
 		return objStack[parse_argument(raw.slice(1))];
 	}
 
-	if(~isNaN(parseFloat(raw))){
+	if(!isNaN(parseFloat(raw))){
 		return parseFloat(raw);
 	}
 
