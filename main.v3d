@@ -1,0 +1,22 @@
+:IMPORT STACK
++cyl;0,0,0;0,0,0;0.2;0.2;black;0.9
++cyl;0,3,0;0,0,0;2;0.2;green;0.9
++cyl;0,-3,0;0,0,0;2;0.2;purple;0.9
++cyl;3,0,0;0,0,90;2;0.2;magenta;0.9
+        # indented comment
+#comment
+:BGSET red
+:ZOOM 10
+
+:STACK.PUSH 1
+:STACK.PUSH 1
+:STACK.PUSH 0
+
+!tick :STACK.OP /0 + /1 0
+!tick :STACK.OP /0 >= 180 2
+!tick :STACK.IF /2 STACK.OP /1 * -1 1
+!tick :STACK.OP /0 <= -180 2
+!tick :STACK.IF /2 STACK.OP /1 * -1 1
+!tick :YAW /0
+
+~@ticka

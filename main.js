@@ -18,9 +18,15 @@ if(IMPORT_SCRIPTS=true) {
 
     // Define a function to be executed after the script loads
     script.onload = function () {
-    // Code to execute after Three.js is loaded
-    init();
-    // console.log('Three.js has been loaded!');
+        // Code to execute after Three.js is loaded
+        fetch("main.v3d")
+            .then((res) => res.text())
+            .then((content) => {
+                // do something with "text"
+                init(content)
+            })
+            .catch((e) => console.error(e));
+        // console.log('Three.js has been loaded!');
     };
 
     // Append the script element to the head of the document
@@ -46,7 +52,7 @@ class ArgumentError extends Error {
     static formatString = "Incorrect number of arguments: %%number%%";
 }
 
-let scene, camera, renderer, controls, objStack, stack, tickCode, running=true;
+let scene, camera, renderer, controls, objStack, stack, tickCode, funcCode, running=true;
 
 controls = {
 
@@ -133,6 +139,7 @@ controls = {
 objStack = [];
 stack = [];
 tickCode = [];
+funcCode = {};
 
 function gen_object(type, argument_array) {
     if(argument_array.length==0) {
@@ -194,11 +201,11 @@ function multi_from_string(input_string) {
     let lines = input_string.split("\n");
     let line;
     for(let n=0;n<lines.length;n++) {
-        line=lines[n];
+        line=lines[n].trim();
         if(line==""){
             continue;
         }
-        switch(lines[n][0]) {
+        switch(line[0]) {
             case "+":                    // add object
                 single_gen_from_string(line.slice(1));
                 break;
@@ -207,6 +214,26 @@ function multi_from_string(input_string) {
                 break;
             case "~":                   // code that runs every tick
                 tickCode.push(line.slice(1));
+                break;
+            case "#":                   // comment
+                break;
+            case "!":                   // add function code
+                spaceIndex = line.search(" ");
+                funcName = line.slice(1, spaceIndex);
+                if(!funcCode[funcName]){
+                    funcCode[funcName] = [];
+                }
+                funcCode[funcName].push(line.slice(spaceIndex+1));
+                break;
+            case "@":
+                if(!funcCode[funcName]){
+                    throw new Error("wrong func");
+                }
+                spaceIndex = line.search(" ");
+                funcName = line.slice(1, spaceIndex);
+                for(let i=0;i<funcCode[funcName].length;i++){
+                    multi_from_string(funcCode[funcName][i]);
+                }
                 break;
             default:    //unknown identifier
                 console.log("Unknown identifier: "+lines[n][0]+" on line "+n);
@@ -231,7 +258,7 @@ function single_command_from_string(input_string) {
     throw new Error("Unknown comName: "+comName)
 }
 
-function init() {
+function init(initcode) {
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -242,22 +269,22 @@ function init() {
 
     animate();
 
-    multi_from_string(
-        ":IMPORT STACK\n"+
-        "+cyl;0,0,0;0,0,0;0.2;0.2;black;0.9\n"+
-        "+cyl;0,3,0;0,0,0;2;0.2;green;0.9\n" +
-        "+cyl;0,-3,0;0,0,0;2;0.2;purple;0.9\n" +
-        "+cyl;3,0,0;0,0,90;2;0.2;magenta;0.9\n" +
-        ":BGSET red\n:ZOOM 10\n"+
-        ":STACK.PUSH 1\n"+ // current yaw
-        ":STACK.PUSH 1\n"+ // current dyaw
-        ":STACK.PUSH 0\n"+ // temp output for condition
-        "~:STACK.OP /0 + /1 0\n"+
-        "~:STACK.OP /0 >= 180 2\n"+
-        "~:STACK.IF /2 STACK.OP /1 * -1 1\n"+
-        "~:STACK.OP /0 <= -180 2\n"+
-        "~:STACK.IF /2 STACK.OP /1 * -1 1\n"+
-        "~:YAW /0\n"
+    // multi_from_string(
+        // ":IMPORT STACK\n"+
+        // "+cyl;0,0,0;0,0,0;0.2;0.2;black;0.9\n"+
+        // "+cyl;0,3,0;0,0,0;2;0.2;green;0.9\n" +
+        // "+cyl;0,-3,0;0,0,0;2;0.2;purple;0.9\n" +
+        // "+cyl;3,0,0;0,0,90;2;0.2;magenta;0.9\n" +
+        // ":BGSET red\n:ZOOM 10\n"+
+        // ":STACK.PUSH 1\n"+ // current yaw
+        // ":STACK.PUSH 1\n"+ // current dyaw
+        // ":STACK.PUSH 0\n"+ // temp output for condition
+        // "~:STACK.OP /0 + /1 0\n"+
+        // "~:STACK.OP /0 >= 180 2\n"+
+        // "~:STACK.IF /2 STACK.OP /1 * -1 1\n"+
+        // "~:STACK.OP /0 <= -180 2\n"+
+        // "~:STACK.IF /2 STACK.OP /1 * -1 1\n"+
+        // "~:YAW /0\n"
 
         
         
@@ -265,7 +292,10 @@ function init() {
         //+
         // "~:DEBUG /0\n"
         
-    )
+    
+        // )
+    
+        multi_from_string(initcode);
 }
 
 function animate() {
@@ -299,3 +329,5 @@ function genDebugObjects() {
         o = gen_object(generators[i].genID, [[i*8, 0, 0], [0,0,0], 3,3,3,3,3,3,3])
     }
 }
+
+run = multi_from_string;
