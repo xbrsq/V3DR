@@ -226,11 +226,11 @@ function multi_from_string(input_string) {
                 funcCode[funcName].push(line.slice(spaceIndex+1));
                 break;
             case "@":
+                funcName = line.slice(1);
                 if(!funcCode[funcName]){
-                    throw new Error("wrong func");
+                    console.log(line);
+                    throw new Error("wrong func: "+funcName);
                 }
-                spaceIndex = line.search(" ");
-                funcName = line.slice(1, spaceIndex);
                 for(let i=0;i<funcCode[funcName].length;i++){
                     multi_from_string(funcCode[funcName][i]);
                 }
@@ -255,6 +255,7 @@ function single_command_from_string(input_string) {
             return;
         }
     }
+
     throw new Error("Unknown comName: "+comName)
 }
 

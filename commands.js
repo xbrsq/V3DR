@@ -1,9 +1,15 @@
 function parse_argument(raw) {
-	if(raw[0]=="/"){
+	if(raw[0]=="/"){ // stack pointer
 		return stack[parse_argument(raw.slice(1))];
 	}
-	if(raw[0]=="&"){
+	if(raw[0]=="&"){ // object pointer
 		return objStack[parse_argument(raw.slice(1))];
+	}
+	if(raw[0]=="="){ // variable marker
+		return vars[parse_argument(raw.slice(1))];
+	}
+	if(raw[0]=="`"){ // raw string
+		return raw.slice(1);
 	}
 
 	if(!isNaN(parseFloat(raw))){
@@ -210,6 +216,28 @@ var commands = [
 			}
 		}
 	},
+	{ // hide obj
+		name: "Hide object",
+		comID: "HIDE",
+		execute: function(data) {
+			let index = data.search(" ");
+			let obj = parse_argument("&"+data.slice(0, index)); // prefix with a "&" to make sure it is an object
+
+			obj.visible = false;
+
+		}
+	},
+	{ // hide obj
+		name: "Show object",
+		comID: "SHOW",
+		execute: function(data) {
+			let index = data.search(" ");
+			let obj = parse_argument("&"+data.slice(0, index)); // prefix with a "&" to make sure it is an object
+
+			obj.visible = true;
+
+		}
+	},
 	{ // 
 		name: "",
 		comID: "",
@@ -243,7 +271,7 @@ const Stack = new CommandLibrary("STACK", [
 			data = data.split(" ");
 
 			let pos = parse_argument(data[0]);
-			let val = parse_argument(data[0]);
+			let val = parse_argument(data[1]);
 
 			stack[pos] = val;
 		}
@@ -261,7 +289,7 @@ const Stack = new CommandLibrary("STACK", [
 		execute: function(data) {
 			data = data.split(" ");
 			let a = parse_argument(data[0]);
-			let op = data[1];
+			let op = parse_argument(data[1]);
 			let b = parse_argument(data[2]);
 			let c = a;
 
@@ -327,5 +355,17 @@ const Stack = new CommandLibrary("STACK", [
 			
 			stack[parse_argument(data[3])] = c;
 		}
-	}
+	},
+	{ // init new variable
+		name: "New Variable",
+		comID: "NEWVAR",
+		execute: function(data) {
+			data = data.split(" ");
+
+			let name = parse_argument(data[0]);
+			let val = parse_argument(data[1]);
+			
+			stack[name] = val;
+		}
+	},
 ]);

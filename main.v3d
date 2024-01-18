@@ -8,6 +8,7 @@
 :BGSET red
 :ZOOM 10
 
+:STACK.NEWVAR t 5
 :STACK.PUSH 1
 :STACK.PUSH 1
 :STACK.PUSH 0
@@ -18,5 +19,7 @@
 !tick :STACK.OP /0 <= -180 2
 !tick :STACK.IF /2 STACK.OP /1 * -1 1
 !tick :YAW /0
+!tick :STACK.OP /t + 1 t
+!tick :DEBUG /t
 
-~@ticka
+~@tick
