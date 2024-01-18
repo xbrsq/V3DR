@@ -368,4 +368,49 @@ const Stack = new CommandLibrary("STACK", [
 			stack[name] = val;
 		}
 	},
+	{ // Repeated execute function
+		name: "repeat execute",
+		comID: "REPEAT",
+		execute: function(data) {
+			num = parse_argument(data.trim().split(" ")[0]);
+
+			for(let i=0;i<num;i++) {
+				multi_from_string(data.slice(data.search(" ")))
+			}
+		}
+	},
+	{ // looped execute function
+		name: "looped execute",
+		comID: "REPEAT",
+		execute: function(data) {
+			cond = data.trim().split(" ")[0];
+
+			while(parse_argument(cond)>0) {
+				multi_from_string(data.slice(data.search(" ")))
+			}
+		}
+	},
+	{ // 
+		name: "",
+		comID: "",
+		execute: function(data) {
+			
+		}
+	}
+]);
+
+const Math = new CommandLibrary("MATH", [
+	{ // Sine
+		name: "sin",
+		comID: "SIN",
+		execute: function(data) {
+			data = data.split(" ");
+			let arg = parse_argument(data[0]);
+			let out = parse_argument(data[1]);
+
+			let val = Math.sin(arg);
+
+			stack[out] = val;
+		}
+	}
 ]);

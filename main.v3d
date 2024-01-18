@@ -20,6 +20,5 @@
 !tick :STACK.IF /2 STACK.OP /1 * -1 1
 !tick :YAW /0
 !tick :STACK.OP /t + 1 t
-!tick :DEBUG /t
 
 ~@tick
